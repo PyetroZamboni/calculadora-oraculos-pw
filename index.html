@@ -1,0 +1,353 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>Calculadora de Oráculos PW | Níveis 70 a 105</title>
+  <style>
+    :root { --bg:#080d17; --panel:#111b2b; --panel2:#172437; --stroke:#29374d; --text:#eef2f8; --muted:#9aa9bd; --gold:#e9c681; --gold2:#af8140; --accent:#7bb9d6; --green:#81d2ac; }
+    * { box-sizing:border-box; }
+    body { margin:0; min-height:100vh; font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Arial,sans-serif; background:radial-gradient(ellipse 600px 380px at 80% -12%,#3a2c233d,transparent),radial-gradient(ellipse 800px 600px at 5% 20%,#15334a60,transparent),var(--bg); color:var(--text); }
+    .shell { max-width:1120px; padding:34px 22px 76px; margin:auto; }
+    .eyebrow { font-size:11px; color:var(--gold); font-weight:800; letter-spacing:.18em; text-transform:uppercase; display:flex;align-items:center;gap:10px; }
+    .eyebrow:before { content:""; display:block; width:23px; height:1px; background:var(--gold); }
+    header { padding:21px 0 28px; display:flex; justify-content:space-between; align-items:flex-end; gap:20px; }
+    h1 { font-size:clamp(34px,5vw,56px); letter-spacing:-.05em; line-height:1.05; margin:0 0 14px; font-weight:780; }
+    h1 span { color:var(--gold); }
+    .desc { margin:0; max-width:630px; line-height:1.6; color:var(--muted); font-size:15px; }
+    .seal { border:1px solid #6f603b; color:var(--gold); padding:12px 16px; border-radius:100px; font-size:11px; white-space:nowrap; letter-spacing:.1em; text-transform:uppercase; background:#332b1c55; }
+    .stats { display:grid; grid-template-columns:repeat(4,1fr); gap:11px; margin-bottom:20px; }
+    .stat { padding:17px 18px; background:#17233390; border:1px solid var(--stroke); border-radius:12px; }
+    .stat small { display:block; font-size:12px; color:var(--muted); margin-bottom:5px; }
+    .stat strong { font-size:19px; font-variant-numeric:tabular-nums; }
+    .server-config { margin-bottom:20px; }
+    .server-head { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px; margin-bottom:17px; }
+    .server-head h2 { margin-bottom:5px; }
+    .server-head .sub { margin:0; }
+    .server-fields { display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px; }
+    .server-field { min-width:0; }
+    .server-field input { font-weight:760; font-size:18px; color:var(--gold); }
+    .server-field .helper { margin:7px 0 0; }
+    .error { color:#ffb6a5;font-size:13px;margin-top:10px; }
+    .layout { display:grid; grid-template-columns:minmax(310px, .92fr) minmax(310px,1.08fr); gap:20px; align-items:stretch; }
+    .panel { border:1px solid var(--stroke); border-radius:18px; background:linear-gradient(145deg,#152237,#101927); padding:28px; box-shadow:0 24px 56px #0003; }
+    .panel.result { background:radial-gradient(ellipse 350px 260px at 93% 0%,#54432a39,transparent),linear-gradient(145deg,#1a2939,#101925); border-color:#4a483e; }
+    h2 { font-size:19px; margin:0 0 6px; letter-spacing:-.02em; }
+    .sub { margin:0 0 24px; color:var(--muted); line-height:1.5; font-size:13px; }
+    [hidden] { display:none !important; }
+    .fields { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; margin-bottom:23px; }
+    label { display:block; color:#c5d1e2; font-size:13px; font-weight:650; margin-bottom:8px; }
+    select, input[type="number"] { appearance:none; width:100%; border:1px solid #3b4b60; color:var(--text); border-radius:10px; background:#0c1727; padding:12px 13px; font:inherit; font-size:15px; outline:none; }
+    select { padding-right:30px; background-image:url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="%23a8bbca" stroke-width="2"%3E%3Cpath d="m6 9 6 6 6-6"/%3E%3C/svg%3E'); background-repeat:no-repeat; background-position:right 10px center; }
+    select:focus, input:focus-visible, button:focus-visible { outline:2px solid var(--gold); outline-offset:2px; }
+    .mini { font-size:12px; color:var(--muted); margin:4px 0 15px; }
+    .mode { display:inline-flex; border:1px solid var(--stroke); background:#0b1727; padding:4px; border-radius:10px; margin-bottom:17px; gap:3px; }
+    .mode button { padding:8px 12px; background:transparent; border:0; border-radius:7px; color:var(--muted); font-weight:650; cursor:pointer; }
+    .mode button.active { background:#2b3a51; color:var(--text); }
+    .percent-line { display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:13px; }
+    .percent-input { display:flex; align-items:center; gap:7px; color:var(--gold); font-weight:760; }
+    .percent-input input[type=number] { width:90px; padding:8px 9px; text-align:right; font-weight:760; color:var(--gold); }
+    .percent-input span { flex-shrink:0; }
+    input[type="range"] { width:100%; accent-color:var(--gold); cursor:pointer; }
+    .progress-wrap { border-radius:100px; height:8px; background:#33445c; margin:14px 0 8px; overflow:hidden; }
+    .progress { height:100%; width:0%; border-radius:100px; background:linear-gradient(90deg,var(--gold2),var(--gold)); }
+    .helper { font-size:12px; line-height:1.5; color:var(--muted); margin-top:10px; }
+    .hero-result { border-bottom:1px solid #4a4b4e; padding-bottom:19px; margin-bottom:19px; }
+    .overline { font-size:11px; color:var(--gold); font-weight:700; letter-spacing:.13em; text-transform:uppercase; margin-bottom:8px; }
+    .big { overflow-wrap:anywhere; font-size:clamp(42px,6vw,64px); font-weight:800; letter-spacing:-.06em; font-variant-numeric:tabular-nums; line-height:1.05; }
+    .big small { font-size:20px; letter-spacing:0; color:var(--gold); margin-left:8px; }
+    .big-sub { font-size:13px; color:var(--muted); margin-top:10px; line-height:1.5; }
+    .metrics { display:grid; grid-template-columns:repeat(2,1fr); gap:12px; }
+    .metric { background:#0c162580; border:1px solid #314053; border-radius:12px; padding:15px; min-height:100px; }
+    .metric label { font-size:12px; color:var(--muted); margin-bottom:12px; }
+    .metric strong { display:block; font-size:clamp(19px,3vw,27px); font-variant-numeric:tabular-nums; letter-spacing:-.03em; }
+    .metric span { display:block; font-size:11px; color:var(--muted); margin-top:7px; }
+    .info { background:#2b311e55; color:#c9d0bd; border:1px solid #565b3d; padding:13px 15px; border-radius:10px; font-size:12px; line-height:1.6; margin-top:14px; }
+    .actions { display:flex; gap:10px; margin-top:18px; flex-wrap:wrap; }
+    button.action { background:var(--gold); color:#241b0f; font-weight:800; border:0; border-radius:10px; padding:11px 17px; cursor:pointer; }
+    button.action.secondary { background:transparent; color:var(--muted); border:1px solid #445367; }
+    .table-panel { margin-top:22px; padding:25px 28px; }
+    .table-head { display:flex;justify-content:space-between;align-items:end;gap:14px;flex-wrap:wrap; }
+    .table-head .sub { margin-bottom:0; }
+    .table-scroll { overflow-x:auto; max-height:480px; overflow-y:auto; margin-top:19px; border:1px solid #314057; border-radius:10px; }
+    table { width:100%; border-collapse:collapse; min-width:560px; font-size:13px; }
+    th,td { text-align:right; padding:11px 14px; border-bottom:1px solid #2b3b4e; font-variant-numeric:tabular-nums; }
+    th:first-child,td:first-child { text-align:left; }
+    thead th { position:sticky;top:0;background:#1d2a3e;color:#b9c9d9;z-index:1; font-weight:680; }
+    tbody tr:nth-child(even) {background:#14223777;}
+    tbody tr.selected {background:#59472b88;}
+    tbody tr:hover {background:#28384a;}
+    .fine { color:var(--muted);font-size:12px;line-height:1.65; margin-top:18px; }
+    a { color:var(--gold); text-underline-offset:3px; }
+    footer { margin-top:26px; color:#74869d; font-size:12px; display:flex; gap:12px; justify-content:space-between; flex-wrap:wrap; }
+    @media(max-width:800px) { .server-fields{grid-template-columns:1fr} .layout{grid-template-columns:1fr}.stats{grid-template-columns:repeat(2,1fr)} .seal{display:none} .shell{padding:22px 14px 56px} .panel{padding:22px 18px} }
+    @media(max-width:400px) { .fields{grid-template-columns:1fr} .stats{gap:8px} .stat{padding:13px} .stat strong{font-size:17px} }
+    @media(prefers-reduced-motion:no-preference) { .progress{transition:width .2s ease;} .mode button{transition:background .15s ease;} }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <div class="eyebrow">Perfect World • Ferramenta de evolução</div>
+    <header>
+      <div>
+        <h1>Calculadora de <span>Oráculos</span></h1>
+        <p class="desc">Planeje sua evolução do nível 70 ao 105. Descubra a XP que falta, quantos Oráculos precisa trocar e o custo real das Sortes PW.</p>
+      </div>
+      <div class="seal">Níveis 70 a 105</div>
+    </header>
+
+    <section class="stats" aria-label="Resumo das regras do servidor">
+      <div class="stat"><small>XP por Oráculo</small><strong id="statXp">103.000 XP</strong></div>
+      <div class="stat"><small>Troca na loja</small><strong id="statTrade">10 Sortes = 2</strong></div>
+      <div class="stat"><small>Valor de uma Sorte</small><strong id="statPrice">28</strong></div>
+      <div class="stat"><small>Custo por troca</small><strong id="statTradeCost">280</strong></div>
+    </section>
+
+    <section class="panel server-config" aria-labelledby="server-title">
+      <div class="server-head">
+        <div><h2 id="server-title">Configuração do seu servidor</h2>
+          <p class="sub">Edite os valores. O resultado e a tabela serão recalculados automaticamente.</p>
+        </div>
+        <button type="button" class="action secondary" id="resetRules">Restaurar valores padrão</button>
+      </div>
+      <div class="server-fields">
+        <div class="server-field">
+          <label for="serverXp">XP recebida por Oráculo</label>
+          <input id="serverXp" type="number" min="1" max="1000000000000" step="1" value="103000" inputmode="numeric">
+          <div class="helper">Padrão: 103.000 XP</div>
+        </div>
+        <div class="server-field">
+          <label for="serverOracles">Oráculos recebidos por troca</label>
+          <input id="serverOracles" type="number" min="1" max="1000000" step="1" value="2" inputmode="numeric">
+          <div class="helper">Cada troca utiliza 10 Sortes PW</div>
+        </div>
+        <div class="server-field">
+          <label for="serverPrice">Preço de cada Sorte PW</label>
+          <input id="serverPrice" type="number" min="0.01" max="1000000000" step="0.01" value="28" inputmode="decimal">
+          <div class="helper">Padrão: 28 moedas por Sorte</div>
+        </div>
+      </div>
+      <p class="error" role="status" id="configError" hidden>Informe valores maiores que zero. XP e quantidade de Oráculos precisam ser números inteiros.</p>
+      <p class="helper">Suas configurações ficam salvas apenas neste navegador. Os custos usam a convenção 1kk = 1.000 moedas.</p>
+    </section>
+
+    <div class="layout">
+      <section class="panel" aria-labelledby="config-title">
+        <h2 id="config-title">Configure sua evolução</h2>
+        <p class="sub">Informe seu nível, a experiência atual e o nível que deseja alcançar.</p>
+        <div class="fields">
+          <div><label for="current">Meu nível atual</label><select id="current"></select></div>
+          <div><label for="target">Quero chegar ao nível</label><select id="target"></select></div>
+        </div>
+        <label>Minha experiência no nível atual</label>
+        <div class="mode" role="group" aria-label="Modo de entrada da experiência">
+          <button type="button" class="active" id="percentMode" aria-pressed="true">Em porcentagem</button>
+          <button type="button" id="absoluteMode" aria-pressed="false">XP exata</button>
+        </div>
+        <div id="percentArea">
+          <div class="percent-line"><label for="percentage" style="margin:0">Barra de experiência</label><div class="percent-input"><input id="percentNumber" type="number" min="0" max="99.99" step="0.01" value="0" inputmode="decimal" aria-label="Porcentagem atual de experiência"><span>%</span></div></div>
+          <input id="percentage" type="range" min="0" max="99.99" step="0.01" value="0">
+          <div class="progress-wrap"><div class="progress" id="progress"></div></div>
+          <div class="helper">Arraste a barra ou digite a porcentagem exata mostrada no jogo.</div>
+        </div>
+        <div id="absoluteArea" hidden>
+          <label for="xpExact">XP acumulada no nível atual</label>
+          <input id="xpExact" type="number" min="0" step="1" inputmode="numeric" value="0">
+          <div class="helper" id="xpExactHelper"></div>
+        </div>
+        <p class="mini" id="currentRequirement"></p>
+        <div class="info" id="exchangeInfo">A loja troca <strong>10 Sortes por 2 Oráculos</strong>. O cálculo arredonda para trocas completas.</div>
+      </section>
+
+      <section class="panel result" aria-live="polite" aria-labelledby="result-title">
+        <h2 id="result-title">Resultado da sua evolução</h2>
+        <p class="sub" id="path">Do nível 70 ao 71</p>
+        <div class="hero-result">
+          <div class="overline">Investimento em moedas do jogo</div>
+          <div class="big"><span id="cost">1,68kk</span></div>
+          <div class="big-sub" id="costExact">1.680 moedas ao todo</div>
+        </div>
+        <div class="metrics">
+          <div class="metric"><label>XP restante</label><strong id="neededXp">1.153.044</strong><span>Para alcançar a meta</span></div>
+          <div class="metric"><label>Oráculos necessários</label><strong id="requiredOracles">12</strong><span id="oracleNote">12 recebidos</span></div>
+          <div class="metric"><label>Sortes PW</label><strong id="sortes">60</strong><span>Para completar as trocas</span></div>
+          <div class="metric"><label>Trocas na loja</label><strong id="trades">6</strong><span id="tradesNote">Cada troca entrega 2 Oráculos</span></div>
+        </div>
+        <div class="info" id="surplus">XP excedente ao usar os Oráculos necessários: 82.956 XP.</div>
+        <div class="actions">
+          <button type="button" class="action" id="copy">Copiar resultado</button>
+          <button type="button" class="action secondary" id="reset">Limpar</button>
+        </div>
+      </section>
+    </div>
+
+    <section class="panel table-panel" aria-labelledby="table-title">
+      <div class="table-head">
+        <div><h2 id="table-title">Tabela de experiência • Nível 70 em diante</h2><p class="sub">Valores para evoluir um nível começando com 0% de XP.</p></div>
+      </div>
+      <div class="table-scroll"><table>
+        <thead><tr><th>De → Para</th><th>XP necessária</th><th>Oráculos necessários</th><th>Sortes PW</th><th>Custo</th></tr></thead>
+        <tbody id="levelRows"></tbody>
+      </table></div>
+      <p class="fine" id="tableNote">A tabela por nível considera cada nível isoladamente, com trocas completas. Para subir vários níveis, use a calculadora acima: ela soma a XP e só depois arredonda as trocas, evitando contar sobras duas vezes. O cálculo pressupõe que a XP excedente é aproveitada ao subir de nível.</p>
+    </section>
+    <footer>
+      <span>XP: <a href="https://guiapw.forumbrasil.net/t572-tabela-de-experiencia" target="_blank" rel="noopener noreferrer">Tabela do GuiaPW</a>, conferida com a <a href="https://wikipw.com.br/index.php/Experi%C3%AAncia" target="_blank" rel="noopener noreferrer">Wiki PW</a>.</span>
+      <span>Valores ajustáveis por servidor. Calculadora local, sem cadastro.</span>
+    </footer>
+  </main>
+<script>
+(function () {
+  'use strict';
+  const xp = {
+    70:1153044,71:1257081,72:1437950,73:1640333,74:1866865,75:2119163,76:2400221,
+    77:2712606,78:3060712,79:3446869,80:3875270,81:4350544,82:4876697,83:5457952,
+    84:6102480,85:6813012,86:7598978,87:8464893,88:9418742,89:10470584,90:11688300,
+    91:13394199,92:14933072,93:16613613,94:18447312,95:20448750,96:22631232,
+    97:25006212,98:27596408,99:30412503,100:66954020,101:267816000,
+    102:535632000,103:1339080000,104:1750000000
+  };
+  const DEFAULT_RULES={xpOracle:103000,oraclesPerTrade:2,sortePrice:28};
+  const SORTES_PER_EXCHANGE=10;
+  const number=n=>Number(n).toLocaleString('pt-BR',{maximumFractionDigits:0});
+  const coins=n=>Number(n).toLocaleString('pt-BR',{maximumFractionDigits:2});
+  // Convenção solicitada: 1kk = 1.000 unidades, 1,4kk = 1.400 unidades.
+  const formatCost=n=>n>=1000?Number(n/1000).toLocaleString('pt-BR',{maximumFractionDigits:5})+'kk':coins(n);
+  const byId=id=>document.getElementById(id);
+  const current=byId('current'),target=byId('target'),percent=byId('percentage'),percentNumber=byId('percentNumber'),exact=byId('xpExact');
+  const xpInput=byId('serverXp'),oraclesInput=byId('serverOracles'),priceInput=byId('serverPrice');
+  let mode='percent';
+  for(let i=70;i<=104;i++) current.add(new Option('Nível '+i,i));
+  const saved=(()=>{ try{return JSON.parse(localStorage.getItem('oraculos_pw_calculadora_v3')||localStorage.getItem('oraculos_pw_calculadora_v2')||'{}');}catch(e){return {};}})();
+  if(saved.rules){
+    if(saved.rules.xpOracle!=null) xpInput.value=String(saved.rules.xpOracle);
+    if(saved.rules.oraclesPerTrade!=null) oraclesInput.value=String(saved.rules.oraclesPerTrade);
+    if(saved.rules.sortePrice!=null) priceInput.value=String(saved.rules.sortePrice);
+  }
+  current.value=String(Math.max(70,Math.min(104,Number(saved.level)||70)));
+  function getRules(){
+    const a=Number(xpInput.value),b=Number(oraclesInput.value),c=Number(priceInput.value);
+    if(!xpInput.value.trim()||!oraclesInput.value.trim()||!priceInput.value.trim()||
+       !Number.isSafeInteger(a)||a<1||a>1e12||!Number.isSafeInteger(b)||b<1||b>1e6||
+       !Number.isFinite(c)||c<0.01||c>1e9||Math.round(c*100)!==c*100 && Math.abs(Math.round(c*100)-c*100)>1e-7) return null;
+    return {xpOracle:a,oraclesPerTrade:b,sortePrice:c};
+  }
+  function updateTargets(prefer){
+    target.replaceChildren();
+    for(let i=Number(current.value)+1;i<=105;i++) target.add(new Option('Nível '+i,i));
+    target.value=String(Math.max(Number(current.value)+1,Math.min(105,Number(prefer)||Number(current.value)+1)));
+  }
+  updateTargets(saved.target);
+  if(saved.mode==='exact') mode='exact';
+  if(typeof saved.percent==='number') percent.value=String(Math.max(0,Math.min(99.99,saved.percent)));
+  percentNumber.value=percent.value;
+  if(typeof saved.exact==='number') exact.value=String(Math.max(0,Math.floor(saved.exact)));
+  function currentHeld(){
+    const requirement=xp[Number(current.value)];
+    return mode==='percent'?Math.floor(requirement*(Math.max(0,Math.min(99.99,Number(percent.value)))/100)):
+      Math.min(requirement-1,Math.max(0,Math.floor(Number(exact.value)||0)));
+  }
+  function setMode(value){
+    if(value!==mode){
+      // Mantém a XP acumulada ao alternar entre % e XP exata.
+      const previousXp=currentHeld();
+      if(value==='exact') exact.value=String(previousXp);
+      else {percent.value=String(Math.min(99.99,Math.round(previousXp/xp[Number(current.value)]*10000)/100));percentNumber.value=percent.value;}
+    }
+    mode=value;
+    byId('percentArea').hidden=value!=='percent';
+    byId('absoluteArea').hidden=value!=='exact';
+    byId('percentMode').classList.toggle('active',value==='percent');
+    byId('absoluteMode').classList.toggle('active',value==='exact');
+    byId('percentMode').setAttribute('aria-pressed',String(value==='percent'));
+    byId('absoluteMode').setAttribute('aria-pressed',String(value==='exact'));
+    render();
+  }
+  function getResult(rules=getRules()){
+    if(!rules)return null;
+    const level=Number(current.value),goal=Number(target.value),forLevel=xp[level];
+    const xpHeld=currentHeld();
+    let missing=forLevel-xpHeld;
+    for(let l=level+1;l<goal;l++) missing+=xp[l];
+    const requiredOracles=Math.ceil(missing/rules.xpOracle),trades=Math.ceil(requiredOracles/rules.oraclesPerTrade);
+    const received=trades*rules.oraclesPerTrade,sortes=trades*SORTES_PER_EXCHANGE,cost=sortes*rules.sortePrice;
+    return {level,goal,forLevel,xpHeld,missing,requiredOracles,trades,received,sortes,cost,surplusXp:requiredOracles*rules.xpOracle-missing,rules};
+  }
+  function render(){
+    const rules=getRules();
+    const level=Number(current.value),goal=Number(target.value),forLevel=xp[level];
+    byId('configError').hidden=Boolean(rules);
+    byId('statXp').textContent=rules?number(rules.xpOracle)+' XP':'—';
+    byId('statTrade').textContent=rules?'10 Sortes = '+number(rules.oraclesPerTrade):'—';
+    byId('statPrice').textContent=rules?coins(rules.sortePrice):'—';
+    byId('statTradeCost').textContent=rules?formatCost(SORTES_PER_EXCHANGE*rules.sortePrice):'—';
+    byId('exchangeInfo').textContent=rules?'Cada troca utiliza 10 Sortes e entrega '+number(rules.oraclesPerTrade)+' Oráculos. A compra é sempre arredondada para trocas completas.':'Preencha os valores do servidor para calcular a troca.';
+    byId('currentRequirement').textContent='XP total exigida no nível '+level+': '+number(forLevel)+' XP.';
+    byId('xpExactHelper').textContent='Valor permitido: 0 até '+number(forLevel-1)+' XP.';
+    exact.max=forLevel-1;
+    if(document.activeElement!==percentNumber) percentNumber.value=percent.value;
+    byId('progress').style.width=(mode==='percent'?Math.max(0,Math.min(99.99,Number(percent.value))):currentHeld()/forLevel*100)+'%';
+    byId('path').textContent='Do nível '+level+' ao '+goal+(goal===level+1?' • Próximo nível':' • Vários níveis');
+    const r=getResult(rules);
+    const ids=['cost','costExact','neededXp','requiredOracles','oracleNote','sortes','trades','tradesNote','surplus'];
+    if(!r){
+      for(const id of ids) byId(id).textContent='—';
+      byId('costExact').textContent='Ajuste as regras do servidor acima.';
+      byId('copy').disabled=true;
+    }else{
+      byId('copy').disabled=false;
+      byId('cost').textContent=formatCost(r.cost);
+      byId('costExact').textContent=coins(r.cost)+' moedas do jogo ao todo';
+      byId('neededXp').textContent=number(r.missing);
+      byId('requiredOracles').textContent=number(r.requiredOracles);
+      byId('oracleNote').textContent=number(r.received)+' recebidos'+(r.received>r.requiredOracles?' • '+number(r.received-r.requiredOracles)+' excedentes':'');
+      byId('sortes').textContent=number(r.sortes);
+      byId('trades').textContent=number(r.trades);
+      byId('tradesNote').textContent='Cada troca entrega '+number(rules.oraclesPerTrade)+' Oráculos';
+      byId('surplus').textContent='XP potencial excedente ao usar '+number(r.requiredOracles)+' Oráculos: '+number(r.surplusXp)+' XP. '+(r.received>r.requiredOracles?'Sobram '+number(r.received-r.requiredOracles)+' Oráculos da troca para uso futuro.':'Nenhum Oráculo sobra na troca.');
+    }
+    buildRows(rules);
+    for(const row of document.querySelectorAll('#levelRows tr')) row.classList.toggle('selected',Number(row.dataset.level)===level);
+    // Só persiste configurações válidas: apagar um campo temporariamente não destrói o valor salvo.
+    if(rules) try{localStorage.setItem('oraculos_pw_calculadora_v3',JSON.stringify({level,target:goal,percent:Number(percent.value),exact:Number(exact.value),mode,rules}));}catch(e){}
+    return r;
+  }
+  function buildRows(rules){
+    const html=[];
+    for(let l=70;l<=104;l++){
+      if(!rules){html.push('<tr data-level="'+l+'"><td>'+l+' → '+(l+1)+'</td><td>'+number(xp[l])+'</td><td>—</td><td>—</td><td>—</td></tr>');continue;}
+      const oracles=Math.ceil(xp[l]/rules.xpOracle),trades=Math.ceil(oracles/rules.oraclesPerTrade),sortes=trades*SORTES_PER_EXCHANGE;
+      html.push('<tr data-level="'+l+'"><td>'+l+' → '+(l+1)+'</td><td>'+number(xp[l])+'</td><td>'+number(oracles)+'</td><td>'+number(sortes)+'</td><td>'+formatCost(sortes*rules.sortePrice)+'</td></tr>');
+    }
+    byId('levelRows').innerHTML=html.join('');
+  }
+  current.addEventListener('change',()=>{updateTargets(Number(target.value)); exact.value=0; render();});
+  target.addEventListener('change',render);
+  percent.addEventListener('input',()=>{percentNumber.value=percent.value;render();});
+  percentNumber.addEventListener('input',()=>{
+    const n=Number(String(percentNumber.value).replace(',','.'));
+    if(!Number.isFinite(n))return;
+    percent.value=String(Math.max(0,Math.min(99.99,n)));
+    render();
+  });
+  percentNumber.addEventListener('blur',()=>{percentNumber.value=percent.value;});
+  exact.addEventListener('input',render);
+  for(const input of [xpInput,oraclesInput,priceInput])input.addEventListener('input',render);
+  byId('resetRules').addEventListener('click',()=>{xpInput.value=String(DEFAULT_RULES.xpOracle);oraclesInput.value=String(DEFAULT_RULES.oraclesPerTrade);priceInput.value=String(DEFAULT_RULES.sortePrice);render();});
+  byId('percentMode').addEventListener('click',()=>setMode('percent'));
+  byId('absoluteMode').addEventListener('click',()=>setMode('exact'));
+  byId('reset').addEventListener('click',()=>{current.value='70';updateTargets(71);percent.value='0';percentNumber.value='0';exact.value='0';setMode('percent');});
+  byId('copy').addEventListener('click',async()=>{
+    const r=getResult();
+    if(!r)return;
+    const summary=['Perfect World • Calculadora de Oráculos','Nível: '+r.level+' → '+r.goal,'Configuração: '+number(r.rules.xpOracle)+' XP por Oráculo, '+r.rules.oraclesPerTrade+' Oráculos por 10 Sortes, '+coins(r.rules.sortePrice)+' moedas por Sorte','XP restante: '+number(r.missing),'Oráculos necessários: '+r.requiredOracles,'Oráculos recebidos: '+r.received,'Trocas de 10 Sortes: '+r.trades,'Sortes PW: '+r.sortes,'Custo: '+formatCost(r.cost)+' ('+coins(r.cost)+' moedas)','XP excedente: '+number(r.surplusXp)].join('\n');
+    try {await navigator.clipboard.writeText(summary);byId('copy').textContent='Resultado copiado!';}
+    catch(e) {const t=document.createElement('textarea');t.value=summary;document.body.appendChild(t);t.select();try{document.execCommand('copy');byId('copy').textContent='Resultado copiado!';}catch(ex){byId('copy').textContent='Cópia indisponível';}t.remove();}
+    window.setTimeout(()=>byId('copy').textContent='Copiar resultado',1600);
+  });
+  setMode(mode);
+})();
+</script>
+</body>
+</html>
