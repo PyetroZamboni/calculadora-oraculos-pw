@@ -63,6 +63,18 @@
     .actions { display:flex; gap:10px; margin-top:18px; flex-wrap:wrap; }
     button.action { background:var(--gold); color:#241b0f; font-weight:800; border:0; border-radius:10px; padding:11px 17px; cursor:pointer; }
     button.action.secondary { background:transparent; color:var(--muted); border:1px solid #445367; }
+
+    .budget { margin-top:22px; }
+    .budget-top { display:grid; grid-template-columns:minmax(220px,1fr) minmax(240px,1fr);gap:18px;align-items:end;margin:20px 0; }
+    .budget-entry {position:relative;}
+    .budget-entry input {padding-right:60px;font-size:24px;font-weight:750;color:var(--gold);}
+    .budget-entry span {position:absolute;right:17px;top:50%;transform:translateY(-50%);font-size:17px;font-weight:800;color:var(--gold);pointer-events:none;}
+    .budget-feature {border:1px solid #67583d;background:#2a2b2750;border-radius:14px;padding:18px;}
+    .budget-feature strong{display:block;font-size:clamp(34px,5vw,49px);letter-spacing:-.035em;font-variant-numeric:tabular-nums;color:var(--gold);}
+    .budget-feature .overline{margin-bottom:5px;}
+    .budget-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;}
+    .budget-grid .metric {min-height:95px;}
+    .budget-note{margin-top:16px;}
     .table-panel { margin-top:22px; padding:25px 28px; }
     .table-head { display:flex;justify-content:space-between;align-items:end;gap:14px;flex-wrap:wrap; }
     .table-head .sub { margin-bottom:0; }
@@ -77,7 +89,7 @@
     .fine { color:var(--muted);font-size:12px;line-height:1.65; margin-top:18px; }
     a { color:var(--gold); text-underline-offset:3px; }
     footer { margin-top:26px; color:#74869d; font-size:12px; display:flex; gap:12px; justify-content:space-between; flex-wrap:wrap; }
-    @media(max-width:800px) { .server-fields{grid-template-columns:1fr} .layout{grid-template-columns:1fr}.seal{display:none} .shell{padding:22px 14px 56px} .panel{padding:22px 18px} }
+    @media(max-width:800px) { .server-fields{grid-template-columns:1fr} .layout{grid-template-columns:1fr}.budget-top{grid-template-columns:1fr}.budget-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.seal{display:none} .shell{padding:22px 14px 56px} .panel{padding:22px 18px} }
     @media(max-width:400px) { .fields{grid-template-columns:1fr} }
     @media(prefers-reduced-motion:no-preference) { .progress{transition:width .2s ease;} .mode button{transition:background .15s ease;} }
   </style>
@@ -172,6 +184,36 @@
       </section>
     </div>
 
+    <section class="panel budget" aria-labelledby="budget-title">
+      <h2 id="budget-title">Quantos Oráculos consigo com minha bag?</h2>
+      <p class="sub">Digite seu saldo em kk e descubra o máximo de Oráculos que consegue comprar. O resultado muda com as configurações do servidor.</p>
+      <div class="budget-top">
+        <div>
+          <label for="budgetKk">Quanto tenho na bag?</label>
+          <div class="budget-entry">
+            <input type="number" id="budgetKk" min="0" max="100000000" step="0.001" value="20" inputmode="decimal" aria-describedby="budgetHelp">
+            <span aria-hidden="true">kk</span>
+          </div>
+          <p class="helper" id="budgetHelp">Exemplo: 20 significa 20kk (20.000 moedas). 1kk = 1.000 moedas.</p>
+          <p class="error" id="budgetError" role="status" hidden>Informe um saldo válido, maior ou igual a zero.</p>
+        </div>
+        <div class="budget-feature" aria-live="polite">
+          <div class="overline">Oráculos que você consegue</div>
+          <strong id="budgetOracles">142</strong>
+          <div class="helper" id="budgetSubtitle">Com o saldo informado</div>
+        </div>
+      </div>
+      <div class="budget-grid" aria-live="polite">
+        <div class="metric"><label>Sortes PW</label><strong id="budgetSortes">710</strong><span>Para todas as trocas</span></div>
+        <div class="metric"><label>Trocas completas</label><strong id="budgetTrades">71</strong><span>10 Sortes por troca</span></div>
+        <div class="metric"><label>XP que pode ganhar</label><strong id="budgetXp">14.626.000</strong><span>Com os Oráculos recebidos</span></div>
+        <div class="metric"><label>Valor gasto</label><strong id="budgetSpent">19,88kk</strong><span id="budgetSpentExact">19.880 moedas</span></div>
+        <div class="metric"><label>Sobra na bag</label><strong id="budgetLeft">120</strong><span id="budgetLeftExact">120 moedas</span></div>
+        <div class="metric"><label>Custo por troca</label><strong id="budgetExchange">280</strong><span>10 Sortes PW</span></div>
+      </div>
+      <div class="info budget-note" id="budgetMessage" role="status">Com 20kk você consegue 142 Oráculos e ainda sobram 120 moedas.</div>
+    </section>
+
     <section class="panel table-panel" aria-labelledby="table-title">
       <div class="table-head">
         <div><h2 id="table-title">Tabela de experiência • Nível 70 em diante</h2><p class="sub">Valores para evoluir um nível começando com 0% de XP.</p></div>
@@ -206,7 +248,7 @@
   const formatCost=n=>n>=1000?Number(n/1000).toLocaleString('pt-BR',{maximumFractionDigits:5})+'kk':coins(n);
   const byId=id=>document.getElementById(id);
   const current=byId('current'),target=byId('target'),percent=byId('percentage'),percentNumber=byId('percentNumber'),exact=byId('xpExact');
-  const xpInput=byId('serverXp'),oraclesInput=byId('serverOracles'),priceInput=byId('serverPrice');
+  const xpInput=byId('serverXp'),oraclesInput=byId('serverOracles'),priceInput=byId('serverPrice'),budgetInput=byId('budgetKk');
   let mode='percent';
   for(let i=70;i<=104;i++) current.add(new Option('Nível '+i,i));
   const saved=(()=>{ try{return JSON.parse(localStorage.getItem('oraculos_pw_calculadora_v3')||localStorage.getItem('oraculos_pw_calculadora_v2')||'{}');}catch(e){return {};}})();
@@ -233,6 +275,7 @@
   if(typeof saved.percent==='number') percent.value=String(Math.max(0,Math.min(99.99,saved.percent)));
   percentNumber.value=percent.value;
   if(typeof saved.exact==='number') exact.value=String(Math.max(0,Math.floor(saved.exact)));
+  if(typeof saved.budgetKk==='number'&&Number.isFinite(saved.budgetKk)&&saved.budgetKk>=0) budgetInput.value=String(saved.budgetKk);
   function currentHeld(){
     const requirement=xp[Number(current.value)];
     return mode==='percent'?Math.floor(requirement*(Math.max(0,Math.min(99.99,Number(percent.value)))/100)):
@@ -264,6 +307,37 @@
     const received=trades*rules.oraclesPerTrade,sortes=trades*SORTES_PER_EXCHANGE,cost=sortes*rules.sortePrice;
     return {level,goal,forLevel,xpHeld,missing,requiredOracles,trades,received,sortes,cost,surplusXp:requiredOracles*rules.xpOracle-missing,rules};
   }
+  function renderBudget(rules) {
+    const raw=budgetInput.value.trim(),kk=Number(raw);
+    const valid=raw!==''&&Number.isFinite(kk)&&kk>=0&&kk<=100000000;
+    byId('budgetError').hidden=valid;
+    const fields=['budgetOracles','budgetSortes','budgetTrades','budgetXp','budgetSpent','budgetSpentExact','budgetLeft','budgetLeftExact','budgetExchange'];
+    if(!rules||!valid){
+      fields.forEach(id=>byId(id).textContent='—');
+      byId('budgetSubtitle').textContent='Preencha os valores corretamente';
+      byId('budgetMessage').textContent='Informe um saldo e configurações válidas para calcular.';
+      return;
+    }
+    // Centavos: evita erros de arredondamento no preço da Sorte.
+    const available=Math.round(kk*100000),exchange=Math.round(10*rules.sortePrice*100);
+    const trades=Math.floor(available/exchange);
+    const oracleCount=trades*rules.oraclesPerTrade;
+    const spent=trades*exchange;
+    const left=available-spent;
+    byId('budgetOracles').textContent=number(oracleCount);
+    byId('budgetSortes').textContent=number(trades*10);
+    byId('budgetTrades').textContent=number(trades);
+    byId('budgetXp').textContent=number(oracleCount*rules.xpOracle);
+    byId('budgetSpent').textContent=formatCost(spent/100);
+    byId('budgetSpentExact').textContent=coins(spent/100)+' moedas';
+    byId('budgetLeft').textContent=formatCost(left/100);
+    byId('budgetLeftExact').textContent=coins(left/100)+' moedas';
+    byId('budgetExchange').textContent=formatCost(exchange/100);
+    byId('budgetSubtitle').textContent=number(trades)+' trocas de 10 Sortes PW';
+    byId('budgetMessage').textContent=trades
+      ? 'Com '+formatCost(available/100)+' na bag você compra '+number(oracleCount)+' Oráculos, ganha até '+number(oracleCount*rules.xpOracle)+' XP, gasta '+formatCost(spent/100)+' e sobram '+coins(left/100)+' moedas.'
+      : 'Saldo insuficiente para uma troca completa. Faltam '+formatCost((exchange-available)/100)+' para comprar '+number(rules.oraclesPerTrade)+' Oráculos.';
+  }
   function render(){
     const rules=getRules();
     const level=Number(current.value),goal=Number(target.value),forLevel=xp[level];
@@ -294,9 +368,10 @@
       byId('surplus').textContent='XP potencial excedente ao usar '+number(r.requiredOracles)+' Oráculos: '+number(r.surplusXp)+' XP. '+(r.received>r.requiredOracles?'Sobram '+number(r.received-r.requiredOracles)+' Oráculos da troca para uso futuro.':'Nenhum Oráculo sobra na troca.');
     }
     buildRows(rules);
+    renderBudget(rules);
     for(const row of document.querySelectorAll('#levelRows tr')) row.classList.toggle('selected',Number(row.dataset.level)===level);
     // Só persiste configurações válidas: apagar um campo temporariamente não destrói o valor salvo.
-    if(rules) try{localStorage.setItem('oraculos_pw_calculadora_v3',JSON.stringify({level,target:goal,percent:Number(percent.value),exact:Number(exact.value),mode,rules}));}catch(e){}
+    if(rules) try{localStorage.setItem('oraculos_pw_calculadora_v3',JSON.stringify({level,target:goal,percent:Number(percent.value),exact:Number(exact.value),mode,rules,budgetKk:Number(budgetInput.value)}));}catch(e){}
     return r;
   }
   function buildRows(rules){
@@ -319,7 +394,7 @@
   });
   percentNumber.addEventListener('blur',()=>{percentNumber.value=percent.value;});
   exact.addEventListener('input',render);
-  for(const input of [xpInput,oraclesInput,priceInput])input.addEventListener('input',render);
+  for(const input of [xpInput,oraclesInput,priceInput,budgetInput])input.addEventListener('input',render);
   byId('resetRules').addEventListener('click',()=>{xpInput.value=String(DEFAULT_RULES.xpOracle);oraclesInput.value=String(DEFAULT_RULES.oraclesPerTrade);priceInput.value=String(DEFAULT_RULES.sortePrice);render();});
   byId('percentMode').addEventListener('click',()=>setMode('percent'));
   byId('absoluteMode').addEventListener('click',()=>setMode('exact'));
